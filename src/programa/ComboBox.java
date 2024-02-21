@@ -1,43 +1,28 @@
 //Llenar un JComboBox con datos de una BD
-
-
+//Seleccionar desde un JComboBox y llenar datos en un JTable
 package programa;
 
+import java.awt.event.ItemEvent;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.table.DefaultTableModel;
 import modelo.Conexion;
+import modelo.Pais;
 
 public class ComboBox extends javax.swing.JFrame {
 
-    
     public ComboBox() {
         initComponents();
-        
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        
-        comboPaises.addItem("Seleccione país"); //Agregamos un item inicial en el comboBox
-        
-        try {
-            Conexion con = new Conexion();
-            Connection conexion = con.getConnection();
-            
-            ps = conexion.prepareStatement("select nombrePais from paises"); // o tambien se puede poner: select * from paises
-            rs = ps.executeQuery();
-            
-            while(rs.next()){
-                comboPaises.addItem(rs.getString("nombrePais")); //Agrege los items, que nos traega todos los nombres de la tabla nombrePais
-            }
-            
-            rs.close();
-            
-        } catch (Exception e) {
-            System.err.println("Error, "+e);
-        }
+
+        Pais pais = new Pais();
+        DefaultComboBoxModel modeloCombo = new DefaultComboBoxModel(pais.mostrarPaises()); //Creamos el modelo para el comboBox y le vamos a pasar el objeto pais con su metodo mostrarPaises
+        comboPaises.setModel(modeloCombo); //Al comboPaises le vamos a pasar el modelo
+
     }
 
-    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -52,6 +37,12 @@ public class ComboBox extends javax.swing.JFrame {
 
         jLabel1.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
         jLabel1.setText("País:");
+
+        comboPaises.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                comboPaisesItemStateChanged(evt);
+            }
+        });
 
         tablaEstados.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -119,7 +110,58 @@ public class ComboBox extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    
+    private void comboPaisesItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_comboPaisesItemStateChanged
+        //Este evento nos permitira saber si alguno de los paises ha sido seleccionado
+        if (evt.getStateChange() == ItemEvent.SELECTED) {
+            Pais pais = (Pais) comboPaises.getSelectedItem();
+
+            DefaultTableModel modeloTabla = new DefaultTableModel();
+            tablaEstados.setModel(modeloTabla); //Vamos a establecerle el modelo a la tabla
+
+
+            PreparedStatement ps = null;
+            ResultSet rs = null;
+
+            try {
+                Conexion con = new Conexion();
+                Connection conexion = con.getConnection();
+
+                
+                ps = conexion.prepareStatement("select idestado, nombreEstado from estados where idPais="+pais.getIdPais()); 
+                rs = ps.executeQuery();
+
+                modeloTabla.addColumn("ID Estado");
+                modeloTabla.addColumn("Nombre Estado");
+                
+
+                //Para no poner siempre el numero exacto de columnas, obtenemos el numero de columnas exactamente sin numero
+                ResultSetMetaData rsMD = rs.getMetaData();
+                int cantidadColumnas = rsMD.getColumnCount();
+
+                //Cambiar el tamaño del ancho de cada columna de nuestra JTable
+                int anchos[] = {50, 150}; //Definiendo el ancho 
+
+                
+                for (int i = 0; i < cantidadColumnas; i++) {
+                    tablaEstados.getColumnModel().getColumn(i).setPreferredWidth(anchos[i]); //Establecemos el ancho
+                }
+
+                while (rs.next()) { //mientras siga habiendo registros en mi BD, continuamos
+                    Object fila[] = new Object[cantidadColumnas];
+                    for (int i = 0; i < cantidadColumnas; i++) {
+                        fila[i] = rs.getObject(i + 1); //Tenemos que ponerle i+1 para que no nos tome el id
+                    }
+
+                    modeloTabla.addRow(fila); //Los agregamos a las filas de la tabla  
+                }
+
+            } catch (Exception e) {
+                System.err.println("Error, " + e);
+            }
+
+        }
+    }//GEN-LAST:event_comboPaisesItemStateChanged
+
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
