@@ -1,5 +1,7 @@
 //Llenar un JComboBox con datos de una BD
 //Seleccionar desde un JComboBox y llenar datos en un JTable
+//JComboBox Anidados con datos de una BD
+
 package programa;
 
 import java.awt.event.ItemEvent;
@@ -9,7 +11,9 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.table.DefaultTableModel;
+import modelo.Ciudad;
 import modelo.Conexion;
+import modelo.Estado;
 import modelo.Pais;
 
 public class ComboBox extends javax.swing.JFrame {
@@ -29,9 +33,13 @@ public class ComboBox extends javax.swing.JFrame {
 
         jLabel1 = new javax.swing.JLabel();
         comboPaises = new javax.swing.JComboBox<>();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        tablaEstados = new javax.swing.JTable();
         jLabel2 = new javax.swing.JLabel();
+        comboEstados = new javax.swing.JComboBox<>();
+        jLabel3 = new javax.swing.JLabel();
+        comboCiudades = new javax.swing.JComboBox<>();
+        jLabel4 = new javax.swing.JLabel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        areaInformacion = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -44,54 +52,51 @@ public class ComboBox extends javax.swing.JFrame {
             }
         });
 
-        tablaEstados.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null},
-                {null, null},
-                {null, null},
-                {null, null}
-            },
-            new String [] {
-                "ID Estado", "Nombre Estado"
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.Integer.class, java.lang.String.class
-            };
-            boolean[] canEdit = new boolean [] {
-                false, false
-            };
+        jLabel2.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
+        jLabel2.setText("Estado:");
 
-            public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
-            }
-
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
+        comboEstados.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                comboEstadosItemStateChanged(evt);
             }
         });
-        jScrollPane1.setViewportView(tablaEstados);
 
-        jLabel2.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
-        jLabel2.setText("Estados:");
+        jLabel3.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
+        jLabel3.setText("Ciudad:");
+
+        comboCiudades.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                comboCiudadesItemStateChanged(evt);
+            }
+        });
+
+        jLabel4.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
+        jLabel4.setText("Información:");
+
+        areaInformacion.setColumns(20);
+        areaInformacion.setRows(5);
+        jScrollPane1.setViewportView(areaInformacion);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGap(61, 61, 61)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 310, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(102, 102, 102)
-                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel4)
+                            .addComponent(jLabel3)
+                            .addComponent(jLabel2)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(34, 34, 34)
-                        .addComponent(comboPaises, javax.swing.GroupLayout.PREFERRED_SIZE, 237, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(47, 47, 47)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 444, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel2))))
-                .addContainerGap(50, Short.MAX_VALUE))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(comboPaises, 0, 237, Short.MAX_VALUE)
+                            .addComponent(comboEstados, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(comboCiudades, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                .addContainerGap(131, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -100,11 +105,19 @@ public class ComboBox extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
                     .addComponent(comboPaises, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 32, Short.MAX_VALUE)
-                .addComponent(jLabel2)
+                .addGap(33, 33, 33)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel2)
+                    .addComponent(comboEstados, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(39, 39, 39)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(comboCiudades, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel3))
+                .addGap(39, 39, 39)
+                .addComponent(jLabel4)
                 .addGap(18, 18, 18)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 219, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(50, 50, 50))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(32, Short.MAX_VALUE))
         );
 
         pack();
@@ -112,55 +125,37 @@ public class ComboBox extends javax.swing.JFrame {
 
     private void comboPaisesItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_comboPaisesItemStateChanged
         //Este evento nos permitira saber si alguno de los paises ha sido seleccionado
-        if (evt.getStateChange() == ItemEvent.SELECTED) {
+        if (evt.getStateChange() == ItemEvent.SELECTED) {  // Checar este metodo
             Pais pais = (Pais) comboPaises.getSelectedItem();
 
-            DefaultTableModel modeloTabla = new DefaultTableModel();
-            tablaEstados.setModel(modeloTabla); //Vamos a establecerle el modelo a la tabla
-
-
-            PreparedStatement ps = null;
-            ResultSet rs = null;
-
-            try {
-                Conexion con = new Conexion();
-                Connection conexion = con.getConnection();
-
-                
-                ps = conexion.prepareStatement("select idestado, nombreEstado from estados where idPais="+pais.getIdPais()); 
-                rs = ps.executeQuery();
-
-                modeloTabla.addColumn("ID Estado");
-                modeloTabla.addColumn("Nombre Estado");
-                
-
-                //Para no poner siempre el numero exacto de columnas, obtenemos el numero de columnas exactamente sin numero
-                ResultSetMetaData rsMD = rs.getMetaData();
-                int cantidadColumnas = rsMD.getColumnCount();
-
-                //Cambiar el tamaño del ancho de cada columna de nuestra JTable
-                int anchos[] = {50, 150}; //Definiendo el ancho 
-
-                
-                for (int i = 0; i < cantidadColumnas; i++) {
-                    tablaEstados.getColumnModel().getColumn(i).setPreferredWidth(anchos[i]); //Establecemos el ancho
-                }
-
-                while (rs.next()) { //mientras siga habiendo registros en mi BD, continuamos
-                    Object fila[] = new Object[cantidadColumnas];
-                    for (int i = 0; i < cantidadColumnas; i++) {
-                        fila[i] = rs.getObject(i + 1); //Tenemos que ponerle i+1 para que no nos tome el id
-                    }
-
-                    modeloTabla.addRow(fila); //Los agregamos a las filas de la tabla  
-                }
-
-            } catch (Exception e) {
-                System.err.println("Error, " + e);
-            }
-
+            Estado estado = new Estado();
+            DefaultComboBoxModel modeloComboEstados = new DefaultComboBoxModel(estado.mostrarEstados(pais.getIdPais()));
+            comboEstados.setModel(modeloComboEstados);
+            comboCiudades.removeAllItems(); //Quitamos lo que tenga el combo ciudades
         }
     }//GEN-LAST:event_comboPaisesItemStateChanged
+
+    private void comboEstadosItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_comboEstadosItemStateChanged
+        if (evt.getStateChange() == ItemEvent.SELECTED) {  // Checar este metodo
+            Estado estado  = (Estado) comboEstados.getSelectedItem();
+
+            Ciudad ciudad = new Ciudad();
+            DefaultComboBoxModel modeloComboCiudades = new DefaultComboBoxModel(ciudad.mostrarCiudades(estado.getIdEstado()));
+            comboCiudades.setModel(modeloComboCiudades);
+        }
+    }//GEN-LAST:event_comboEstadosItemStateChanged
+
+    private void comboCiudadesItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_comboCiudadesItemStateChanged
+       if (evt.getStateChange() == ItemEvent.SELECTED) {
+           Pais pais = (Pais) comboPaises.getSelectedItem();
+           Estado estado  = (Estado) comboEstados.getSelectedItem();
+           Ciudad ciudad  = (Ciudad) comboCiudades.getSelectedItem();
+
+           areaInformacion.setText("Pais: "+pais.getNombrePais()+
+                   "\nEstado: "+estado.getNombreEstado()+
+                   "\nCiudad: "+ciudad.getNombreCiudad());
+        } 
+    }//GEN-LAST:event_comboCiudadesItemStateChanged
 
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
@@ -195,10 +190,14 @@ public class ComboBox extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JTextArea areaInformacion;
+    private javax.swing.JComboBox<String> comboCiudades;
+    private javax.swing.JComboBox<String> comboEstados;
     private javax.swing.JComboBox<String> comboPaises;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable tablaEstados;
     // End of variables declaration//GEN-END:variables
 }
